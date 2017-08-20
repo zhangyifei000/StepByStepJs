@@ -316,3 +316,417 @@ console.log(fib2(2, 0, 1)) // exited with code=0 in 0.064 seconds
 //index 相当于是一个循环什么时候终止这个循环，我们写的第一个fib函数会先把他们压倒栈里面，我们只有知道f(1) = 1， 才会知道f(2)的值， f(2) = f(1) + f(0)
 //这个时候f(1)会被释放掉，f(2)结果返回之后f(2)会被释放掉一次类推。所以当计算数很大的时候使用这种方法就会造成内存溢出
 //第二个函数把每次的结过都存储在一个变量中
+
+/*
+
+### 闭包
+
+
+```
+闭包就是能够将函数内部的变量与外部进行通信的一座桥梁。
+```
+
+
+```
+function f() {
+      var n = 100
+      console.log(n) // 100
+  }
+
+  console.log(n) // ReferenceError: n is not defined  
+
+  f()
+```
+
+
+
+
+> 我们定义了一个函数，函数在下面f()被调用，函数就会从上往下执行，执行完之后函数内部的声明的变量都会被清空掉，函数内部的变量是对外界不开放的
+
+
+- 假如我们想要在另外一个函数里使用这个变量n我们有哪些方法哪？
+
+
+```
+function f() {
+    var n = 100
+    console.log(n) //100
+    function increment () {
+        n = n + 1;
+        console.log(n) //101
+    }
+    increment()
+}
+
+f()
+```
+
+> 
+> 我们在f()函数里定义了一个increment()函数，里面使用了变量n,这次并没有报错。这就是js里链式作用域，进行冒泡似的查找变量声明。
+
+> 上面的例子，我们看到了一个函数体内定义了另外一个函数。我们知道js中函数是可以作为变量传递的，那么我们修改一下上面的例子
+
+
+```
+function f(increment) {
+    var n = 100
+    console.log(n) // 100
+    increment(n) //调用
+}
+
+f(function(n) { 
+    console.log(n + 1) // 101
+})
+```
+
+
+> 发生了什么，我们将increment函数作为变量传给了f函数，大家看完这个例子是不是感觉有点熟悉的感觉。我们加入一些打印看下执行顺序
+
+
+```
+function f(increment) {
+    console.log("f函数开始")
+    var n = 100
+    console.log(n) // 100
+    increment(n) //调用
+    console.log("f函数结束")
+}
+
+f(function(n) { 
+    console.log(n + 1) // 101
+    console.log("increment函数")
+})
+```
+
+
+
+```
+//打印顺序
+// f函数开始
+// 100
+// 101
+// increment函数
+// f函数结束
+```
+
+
+> 我们看到在f函数里是从上下到下一次执行的，其实上面的例子和下面的事等价的
+
+
+```
+function f() {
+    var increment = function(n) {
+        console.log(n + 1)
+    }
+
+    var n = 100;
+    console.log(n) // 100
+    increment(n) // 101
+}
+
+f()
+```
+
+> 
+> 好了，说了这么多闭包到底可以干啥类。就如我们上面所说的，可以捕获函数里的变量，比如我们函数体内有一个异步操作，我们想在这个函数执行完这些异步操作之后
+> 就可以把这些数据传出去供别人使用了。
+
+
+```
+function getData(successCallBack) {
+    console.log("getData函数开始执行")
+    setTimeout(function() {
+        console.log("执行回调")
+        successCallBack("这些是数据")
+    }, 3000);
+    console.log("getData函数体结束")
+}
+
+getData((data) => {
+    console.log(data)
+})
+
+//执行结果如下
+
+// getData函数开始执行
+// getData函数体结束
+// 执行回调
+// 这些是数据
+```
+
+
+> 闭包会造成内存泄漏，下面我们玩个游戏1,1,2,3,5,8,13,21,34...求第n位是多少！一个经典的算法题
+
+- 使用递归
+
+
+```
+var count = 0
+
+function fib (num) {
+    console.log(count ++) 
+    if (num <= 0) {
+        return 0
+    }
+    if (num === 1) {
+        return 1
+    }
+    return fib(num - 2) + fib(num - 1)
+}
+
+console.log(fib(7)) //8
+```
+
+
+>  fib(6) = fib(5) + fib(4), fib(5) = fib(4) + fib(3) ...... f(2) = f(1) + f(0),一直到最后我们才找到f(0) = 0, f(1) = 1,那么此时函数f(2)才会被释放掉，然后f(3)回后f(3)才会被释放掉。。。,
+>  所以如果num数够大的话那么内存里存储的这些函数也会增多。大家可以测试一下我测的当num = 45时就会执行大概18s,这个数字会根据有所不同，根据电脑性能，反正是很耗时的。
+
+
+```
+var count = 0
+
+function fib (index , left, right) { //使用right作为变量，存储最后这个值
+    console.log(count ++) 
+    if (index === 1) {
+        return right
+    }
+    return fib(index - 1, right, left + right)
+}
+
+console.log(fib(7,0,1)) // 8
+```
+
+
+- 如何不在函数里写控制语句，完成一个循环
+
+
+```
+function circle(index) {
+    if (index === 0) {
+        return 
+    }
+    console.log(index)
+    return circle(index - 1)
+}
+circle(5) //5 4 3 2 1
+```
+
+
+- 闭包是如何保存上下文的
+
+
+```
+function print() {
+    console.log("print开始执行")    
+    for (var index = 0; index < 5; index++) {
+        console.log("for begin")        
+        setTimeout(function() {
+            console.log("callback begin")            
+            console.log(index) // 5,5,5,5,5
+        }, 1000);
+    }
+    console.log("print执行结束")    
+}
+
+print()
+
+//执行顺序
+// print开始执行
+// for begin
+// for begin
+// for begin
+// for begin
+// for begin
+// print执行结束
+// callback begin
+// 5
+// callback begin
+// 5
+// callback begin
+// 5
+// callback begin
+// 5
+// callback begin
+// 5
+```
+
+> 
+> 打印了五个五为什么？在for语句里setTimeout是个异步的函数，在for执行完之后index已经是五了，然后在打印，当然都是5了
+
+- 上面的例子相当于下面的
+
+
+```
+function print() {
+    console.log("print开始执行")    
+    for (var index = 0; index < 5; index++) {
+        console.log("for begin")
+        var callBack =  function() { 
+            console.log("callback begin")            
+            console.log(index) // 5,5,5,5,5
+        }       
+        setTimeout(callBack, 1000);
+    }
+    console.log("print执行结束")    
+}
+
+print()
+```
+
+
+- 使用闭包留index的值
+
+
+```
+function print() {
+    console.log("print开始执行")    
+    for (var index = 0; index < 5; index++) {
+        console.log("for begin")
+        var callBack =  function(index) { 
+            console.log("callback begin")            
+            console.log(index) // 5,5,5,5,5
+        }       
+        setTimeout(callBack(index), 1000); //callBack保留index的值
+    }
+    console.log("print执行结束")    
+}
+
+print()
+```
+
+
+
+```
+//打印顺序
+
+// print开始执行
+// for begin
+// callback begin
+// 0
+// for begin
+// callback begin
+// 1
+// for begin
+// callback begin
+// 2
+// for begin
+// callback begin
+// 3
+// for begin
+// callback begin
+// 4
+// print执行结束
+```
+
+
+- 最终就变成了我们经常写的下面这部分
+
+
+```
+function print(callBack) {
+    console.log("print开始执行")
+    for (var index = 0; index < 5; index++) {
+        console.log("for begin")
+        setTimeout(callBack(index), 1000);
+    }
+    console.log("print执行结束")
+}
+
+var callBack = (index) => {
+    console.log("callback begin")
+    console.log(index)
+}
+
+print(callBack)
+
+//执行顺序
+// print开始执行
+// for begin
+// callback begin
+// 0
+// for begin
+// callback begin
+// 1
+// for begin
+// callback begin
+// 2
+// for begin
+// callback begin
+// 3
+// for begin
+// callback begin
+// 4
+// print执行结束
+```
+
+- 在一个我们经常见的就是函数作为返回值进行返回
+
+
+```
+function increment(x) {
+    return function (y) {
+        return x + y
+    }
+}
+
+var incre10 = increment(10) //相当于 function(y) {return 10 + y}
+console.log(incre10(8)) // 18
+
+//increment相当于一个构造器可以创建函数
+```
+
+- 考虑一下例子
+
+
+```
+var object = {
+    name: 'Bill',
+    getName: function() {
+        return function() {
+            return this.name
+        }
+    }
+}
+console.log(object.getName()()) //undefined
+```
+
+
+> 我们看到getName的上下文是object 那么getName的中使用this的话应该是指向object
+> object.getName()()此时的上下文是global的因为我在node环境下执行的如果在网页里应该是window
+
+
+```
+global.name = 'Jason'
+
+var object = {
+    name: 'Bill',
+    getName: function() {
+        return function() {
+            return this.name
+        }
+    }
+}
+console.log(object.getName()()) //Jason
+```
+
+
+- 还有一种方法
+
+
+```
+var object = {
+    name: 'Bill',
+    getName: function() {
+        var that = this //getName的上下文环境是object
+        return function() {
+            return that.name
+        }
+    }
+}
+console.log(object.getName()()) //Jason
+```
+
+
+> 所以使用闭包的时候要注意上下文环境问题
+
+*/
