@@ -730,3 +730,147 @@ console.log(object.getName()()) //Jason
 > 所以使用闭包的时候要注意上下文环境问题
 
 */
+
+/**
+ * Promise
+ */
+//promise是抽象异步处理对象以及对其进行各种操作的组件。
+// 创建一个promise对象 
+
+var promise = new Promise(function(resolve, reject) {
+    //1.异步处理
+    //2.处理之后调用resove,reject
+});
+
+promise.then(onFulfilled, onRejected)
+
+resolve成功时调用onFulfilled, reject时调用onRejected
+
+promise.catch(onRejected)是一个更好的选择
+
+//下面我们看个例子
+
+// 创建promise对象的流程如下所示。
+// 1. new Promise(fn) 返回一个promise对象 
+// 2. 在 fn 中指定异步等处理
+// • 处理结果正常的话，调用 resolve(处理结果值)
+// • 处理结果错误的话，调用 reject(Error对象)
+
+function getAsyncFunction(error) {
+    return new Promise((resolve, reject) => {
+        setTimeout(function() {
+            if (error) {
+                reject("出错了")
+            } else {
+                resolve("成功了")
+            }
+        }, 2000);
+    })
+}
+
+getAsyncFunction(true).then(function(reslult) {
+    console.log("reslut:" + reslult)
+}).catch(function(error) {
+    console.log("error:" + error) //error:出错了
+})
+
+getAsyncFunction(false).then(function(reslult) {
+    console.log("reslut:" + reslult) // reslut:成功了    
+}).catch(function(error) {
+    console.log("error:" + error) 
+})
+
+//2.如果resolve也是一个promise实例
+
+var p1 = new Promise((resolve) => {
+    setTimeout(() => resolve("p1完成了"), 3000)
+})
+
+var p2 = new Promise((resolve) => {
+    setTimeout(() => resolve("p2执行完了"), 1000)
+})
+
+p1.then((result) => {
+    console.log(result)
+    return p2
+}).then((result) => {
+    console.log(result)
+})
+
+// 3. Promise的all方法提供了并行执行异步操作的能力，并且在所有异步操作执行完后才执行回调
+
+var p1 = new Promise((resolve) => {
+    setTimeout(() => resolve("p1完成了"), 1000)
+})
+
+var p2 = new Promise((resolve) => {
+    setTimeout(() => resolve("p2执行完了"), 2000)
+})
+
+var p3 = new Promise((resolve, reject) => {
+    setTimeout(() => reject("p3执行失败了"), 3000)
+})
+
+Promise.all([p1, p2]).then((resluts) => console.log(resluts)) // [ 'p1完成了', 'p2执行完了' ]
+Promise.all([p1, p2, p3]).then((resluts) => console.log(resluts)).catch((results) => console.log(results)) //p3执行失败了
+
+//p1,p2,p3中p3失败了那么这些状态就是失败了，所以我们在使用all的时候要注意。
+//那么all里执行的顺序是如何的。
+
+//测试1
+var p1 = new Promise((resolve) => {
+    setTimeout(() => resolve("p1完成了"), 8000)
+})
+
+var p2 = new Promise((resolve) => {
+    setTimeout(() => resolve("p2执行完了"), 2000)
+})
+
+Promise.all([p1, p2]).then((resluts) => console.log(resluts)) // [ 'p1完成了', 'p2执行完了' ] exited with code=0 in 8.074 seconds
+
+//测试2
+var p1 = new Promise((resolve) => {
+    setTimeout(() => resolve("p1完成了"), 1000)
+})
+
+var p2 = new Promise((resolve) => {
+    setTimeout(() => resolve("p2执行完了"), 8000)
+})
+
+Promise.all([p1, p2]).then((resluts) => console.log(resluts)) // [ 'p1完成了', 'p2执行完了' ] exited with code=0 in 8.074 seconds
+
+//测试3
+var p1 = new Promise((resolve) => {
+    setTimeout(() => resolve("p1完成了"), 2000)
+})
+
+var p2 = new Promise((resolve) => {
+    setTimeout(() => resolve("p2执行完了"), 2000)
+})
+
+Promise.all([p2, p1]).then((resluts) => console.log(resluts)) // [ 'p2完成了', 'p1执行完了' ]
+
+//测试4
+var p1 = new Promise((resolve) => {
+    setTimeout(() => resolve("p1完成了"), 8000)
+})
+
+var p2 = new Promise((resolve) => {
+    setTimeout(() => resolve("p2执行完了"), 2000)
+})
+
+Promise.all([p2, p1]).then((resluts) => console.log(resluts)) // [ 'p2执行完了', 'p1完成了' ]
+
+//then执行的结果是由all里最晚执行出来的结果之后，才会调用的，也就是all里所有异步都执行完才会调用，并且只要有一个出错就不会调then
+
+// 4， race 是和all差不多的，只不过是里面的异步操作，只要有一个完成就立马调then
+
+var p1 = new Promise((resolve) => {
+    setTimeout(() => resolve("p1完成了"), 8000)
+})
+
+var p2 = new Promise((resolve) => {
+    setTimeout(() => resolve("p2执行完了"), 2000)
+})
+
+Promise.race([p1, p2]).then((resluts) => console.log(resluts)).then // p2执行完了
