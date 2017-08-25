@@ -737,6 +737,8 @@ console.log(object.getName()()) //Jason
 //promise是抽象异步处理对象以及对其进行各种操作的组件。
 // 创建一个promise对象 
 
+/*
+
 var promise = new Promise(function(resolve, reject) {
     //1.异步处理
     //2.处理之后调用resove,reject
@@ -874,3 +876,199 @@ var p2 = new Promise((resolve) => {
 })
 
 Promise.race([p1, p2]).then((resluts) => console.log(resluts)).then // p2执行完了
+
+*/
+
+//javascript执行上下文和调用栈
+
+//javascript在执行过程中通常在以下环境
+//global code: 全局作用域
+// Function code: 当代码执行进入到函数体当中。
+// Eval code: 在 eval 函数内部执行的文本。
+
+var name = 'Bill' 
+
+function print() {
+    console.log(name) //Bill
+    // console.log(age) //ReferenceError: age is not defined    
+
+    function say() {
+        var age = 3 //age是在函数say内，而say在print的函数作用域内
+        console.log(name) //Bill
+    }
+    say()
+}
+print()
+//name变量和print函数都在全局作用域内
+
+//每个函数都会创造一个新的上下文，并且创建出一个局部的作用域
+//作用域声明的东西不能被当前函数作用外部访问到
+
+// 执行上下文栈
+
+// 代码进入函数体内部如果遇到函数，会给这个函数重新创建一个新的执行上下文，然后将它压入栈中
+//浏览器永远会执行当前栈顶部的执行上下文，一旦函数执行完后，就会从栈中弹出，然后执行当前栈中的下一个上下文。
+
+(function foo(i) {
+    debugger;
+    if (3 === i) {
+        return 
+    } else {
+        foo(++i)
+    }
+})(0)
+
+//入栈
+
+// foo(3) i = 3
+// foo(2) i = 2
+// foo(1) i = 1
+// foo(0) i = 0
+// global
+
+//出栈
+//从上往下走，大家把代码复制到浏览器的debug里去看看堆栈，单步调试，就能看到结果
+
+// 解释器执行代码的顺序
+
+// 寻找调用函数的代码
+// 在执行 函数 代码之前, 创建 执行上下文.
+// 进入创建阶段:
+// 初始化 作用域链.
+// 创建变量对象：
+// 创建 参数对象, 检查参数的上下文, 初始化其名称和值并创建一个引用拷贝。
+// 扫描上下文中的函数声明：
+// 对于每个被发现的函数, 在 变量对象 中创建一个和函数名同名的属性，这是函数在内存中的引用。
+// 如果函数名已经存在, 引用值将会被覆盖。
+// 扫描上下文中的变量声明：
+// 对于每个被发现的变量声明,在变量对象中创建一个同名属性并初始化值为 undefined。
+// 如果变量名在 变量对象 中已经存在, 什么都不做，继续扫描。
+// 确定上下文中的 "this"
+// 激活 / 代码执行阶段：
+// 执行 / 在上下文中解释函数代码，并在代码逐行执行时给变量赋值。
+
+// 让我们来看一个例子:
+
+/*
+
+function foo(i) {
+    var a = 'hello';
+    var b = function privateB() {
+
+    };
+    function c() {
+
+    }
+}
+
+foo(22);
+// 在调用foo(22) 的时候, 创建阶段 看起来像是这样:
+
+fooExecutionContext = {
+    scopeChain: { ... },
+    variableObject: {
+        arguments: {
+            0: 22,
+            length: 1
+        },
+        i: 22,
+        c: pointer to function c()
+        a: undefined,
+        b: undefined
+    },
+    this: { ... }
+}
+// 你可以发现, 创建阶段 掌管着属性名的定义，而不是给它们赋值，不过参数除外。 一旦 创建阶段 完成之后，执行流就会进入函数中。 在函数执行完之后，激活 / 代码 执行阶段 看起来像是这样：
+
+fooExecutionContext = {
+    scopeChain: { ... },
+    variableObject: {
+        arguments: {
+            0: 22,
+            length: 1
+        },
+        i: 22,
+        c: pointer to function c()
+        a: 'hello',
+        b: pointer to function privateB()
+    },
+    this: { ... }
+}
+*/
+
+//作用域
+
+function one() {
+    
+        two();
+    
+        function two() {
+    
+            three();
+    
+            function three() {
+                alert('I am at function three');
+            }
+    
+        }
+    
+    }
+    
+    one();
+
+//入栈
+
+// three()
+// two()
+// one()
+// global
+
+// three作用域 = three + two + one + global 
+
+var myConsole = [];
+
+for (var i = 0; i < 5; i++) {
+    myConsole.push(
+        function inner() {
+           console.log(i)
+        }
+    );
+}
+
+console.log(i) // 5 
+
+myConsole[0]() //5
+myConsole[1]() //5
+myConsole[2]() //5
+myConsole[3]() //5
+myConsole[4]() //5
+
+
+//这个inner是创建在glbal上的，那么他的作用域也是global
+//for语句执行完之后i再全局作用域上已经是5了。
+
+//闭包的作用域
+
+function foo() {
+    var a = 'private variable';
+    return function bar() {
+        alert(a);
+    }
+}
+
+var callAlert = foo();
+
+callAlert(); // private variable
+
+//入栈
+
+// bar()
+// foo()
+// global
+
+//bar的作用域是bar + foo + global
+
+//我们通过callAlert()获得了foo，而foo函数返回了bar的函数指针，
+// 那么callAlert的作用域和bar一样了，所以我们就能访问到foo函数内的私有变量了
+
+
