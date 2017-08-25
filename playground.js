@@ -1072,3 +1072,149 @@ callAlert(); // private variable
 // 那么callAlert的作用域和bar一样了，所以我们就能访问到foo函数内的私有变量了
 
 
+//this到底指向谁
+
+//在我们编写的类中我们希望this是指向该类的实例即对象时，我们确有时候会出错。下面让我讨论一下这个this
+// 这里有this 呈现不同值的六种方式。它们分别是：
+
+// 全局环境下的this
+// 对象构造函数中的this
+// 对象方法中的this
+// 简单函数中的this
+// 箭头函数中的this
+// 事件监听器中的this
+
+//在全局环境下this值global或者window
+console.log(this) //浏览器下为window,通常情况下在全局下不使用this
+
+//对象构造函数中的this
+class Human {
+    constructor(name) {
+        this.name = name //this指向实例对象
+    }
+}
+
+var people = new Human('Bill')
+console.log(people.name) //Bill,此时this是people
+
+var student = new Human('Jason')
+console.log(student.name) // Jason 此时this只student
+
+// 对象方法中的this
+
+var o = {
+    sayName() {
+        console.log(this.name)
+        console.log("this指向->", this)
+    }
+}
+
+o.name = 'Bill'
+o.sayName()
+
+//Bill
+// this指向-> { sayName: [Function: sayName], name: 'Bill' }
+
+// 简单函数中的this
+
+function sayName() {
+    console.log(this) //window
+}
+
+//因为sayName我们是在全局作用域内所以里面的this事全局环境下的
+
+//思考下面的代码
+
+var o = {
+    doSomethingLater () {
+      setTimeout(function() {
+        this.speak() // Error
+      }, 1000)
+    },
+    speak() {
+      console.log("Hello Boy")
+    }
+  }
+
+  o.doSomethingLater() //TypeError: this.speak is not a function
+  
+  // setTimeout函数中的回调函数是在全局作用域上所以里面的this是指向window的
+  //我们知道doSomethingLater实在对象o的作用域内的，那么我们就可以使用这个this，来替换下面的this
+
+  var o = {
+    doSomethingLater () {
+        var that = this //这个this是指向o的
+      setTimeout(function() {
+        that.speak()
+      }, 1000)
+    },
+    speak() {
+      console.log("Hello Boy")
+    }
+  }
+
+  o.doSomethingLater() //Hello Boy
+
+// 使用es6中的箭头函数也可以解决上面的问题
+// 箭头函数中的this总是它定义时所指向的环境。
+
+class Increment {
+    constructor(i) {
+        this.i = i
+    }
+
+    print() {
+        setInterval(handlerCallback, 1000) //Uncaught ReferenceError: handlerCallback is not defined //此时是在全局作用域上查找handlerCallback的定义
+    }
+
+    handlerCallback() {
+        console.log(this.i ++)
+    }
+}
+
+var time = new Increment(0)
+time.print() 
+
+//第三种在任意函数内改变this值的方式是使用bind, call 或 apply方法。我们在也经常使用bind来进行this的绑定
+
+class Increment {
+    
+    constructor(i) {
+        // debugger 打开这个可以在浏览器里调试
+        this.i = i
+    }
+
+    print() {
+        setInterval(this.handlerCallback, 1000) //这个this是指当前对象，在当前作用域查找handlerCallback的定义handlerCallback里是用了this.i
+    }
+
+    handlerCallback() {
+        console.log(this.i ++) // 这个this指向了全局此时的i也被是全局的了
+    }
+}
+
+var time = new Increment(0)
+time.print() //NaN
+
+//使用bind绑定
+
+class Increment {
+    
+    constructor(i) {
+        // debugger 打开这个可以在浏览器里调试
+        this.i = i
+    }
+
+    print() {
+        setInterval(this.handlerCallback.bind(this), 1000) //这句话的意思是handlerCallback函数里的this是指向当前对象的
+    }
+
+    handlerCallback() {
+        console.log(this.i ++)
+    }
+}
+
+var time = new Increment(0)
+time.print() //1，2，3.....
+
+//到这里是否明白了this的含义了吗，要结合我们上篇的作用域理解效果更佳
