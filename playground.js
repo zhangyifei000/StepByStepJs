@@ -1218,3 +1218,46 @@ var time = new Increment(0)
 time.print() //1，2，3.....
 
 //到这里是否明白了this的含义了吗，要结合我们上篇的作用域理解效果更佳
+
+process
+
+
+//从localStorage取出的bool值如何转换
+
+const isPrint = localStorage.getItem("isPrint") //如果取不出默认是null, 如果有值是字符串
+
+if (isPrint) {
+    console.log("打印东西")
+} else {
+    console.log("不打印东西")
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
