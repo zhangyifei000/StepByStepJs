@@ -1234,30 +1234,272 @@ if (isPrint) {
 
 
 
+//数组类型
 
+// Undefined, Null, Bollean, Number, String, Object六种数组类型 Symbol (new in ECMAScript 2015）
 
+//typeof用来检测数据类型
 
+var name;
+var course = null;
+var isStudent = true;
+var grade = 80;
+var sex = "女"
+var student = {}
 
+console.log(typeof name)
+console.log(typeof course)
+console.log(typeof isStudent)
+console.log(typeof grade)
+console.log(typeof sex)
+console.log(typeof student)
 
+// undefined
+// object
+// boolean
+// number
+// string
+// object
 
+//我们看到typeof null 会返回一个object 因为null会被认为是一个空对象引用。
 
+// Undefined类型
+// 只有一个undefined值
 
+var message; //声明一个变量默认值是undefined
+console.log(message) //undefined
 
+// Null类型
+// 只有一个特殊值 null,如果定义的变量用来保存对象，那么我们最好给他附上初始值null
+// 实际上undefined是派生自null值得所以他们是相等的,但不是恒等的。他们typeof的值不同
+console.log(undefined == null) //true
+console.log(undefined === false) //false
 
+// Boolean类型
 
+// 有两个值true和false
 
+// 什么时候是false
 
+console.log(Boolean("")) //false 空字符串
+console.log(Boolean(0)) //false 0
+console.log(Boolean(NaN)) //false NaN
+console.log(Boolean(null)) //false null
+console.log(Boolean(undefined)) //false undefined
 
+//其他情况下都是true比如
 
+console.log(Boolean([])) //true 数组
+console.log(Boolean({})) //true 对象
+console.log(Boolean("哈哈哈")) // true 字符串
 
+// if语句里会自动进行转换
 
+var people = null;
 
+if (!people) {
+    console.log("非null")
+}
+// 非null
 
+// Number类型
 
+// 表示整数或者浮点数
+console.log(070) // 八进制的56,八进制第一位必须是0然后是八进制数字（0-7）
+console.log(0XA) //  十六进制的10 十六进制第一位必须是0x然后是（0-9）(A-F)
+console.log(0b01) // 二进制的1 二进制是0b开头 后面是（0-1）
 
+// 浮点数存在误差
 
+if (0.1 + 0.2 === 0.3) {
+    console.log("0.3") //不会执行
+}
 
+// NaN指非数值 
 
+console.log(3/0) //Infinity
+console.log(NaN/10) //NaN
+console.log(NaN === NaN) //false
 
+//使用isNaN函数判断是不是数值
+console.log(isNaN(NaN)) //true
 
+//isNaN接受到一个值后尝试把这个转换成数值如果成功就会返回false,其他就是true
+
+console.log(isNaN('10')) //false
+console.log(isNaN(true)) //false
+console.log(isNaN('gg')) //true
+
+//所以使用isNaN时要注意
+
+// 调用isNaN函数时会先调用valueOf()方法，然后确定返回值是否可以转换成数值，如果不能则
+// 根据这个返回值在调用toString()方法。
+
+// 数值转换
+// Number(), parseInt(), praseFloat()可以将非数值转换成数值
+// 转换规则如下 
+// Boolean true -> 1, false -> 0
+console.log(Number(true)) //1
+// Number 返回本身
+// Null null -> 0
+console.log(Number(null)) //0
+//  字符串 
+
+console.log(Number("123")) //123
+console.log(Number("+123"))//123
+console.log(Number("0123"))//123
+console.log(Number("12.3"))//12.3
+console.log(Number("0xf"))//15
+console.log(Number(""))//0
+console.log(Number("123哈哈哈")) //NaN
+console.log(Number("哈哈123")) //NaN
+
+//  Object
+console.log(Number({age: 3})) //NaN
+//如果是对象的话会先调用对象的valueOf()方法然后在按照前面的转换规则如果转换结果是NaN,在调用toString方法然后在依照前面的规则转换成字符串
+
+// parseInt函数
+console.log(parseInt("123")) //123
+console.log(parseInt("+123"))//123
+console.log(parseInt("0123"))//123
+console.log(parseInt("12.3"))//12
+console.log(parseInt("0xf"))//15
+console.log(parseInt(""))//NaN
+console.log(parseInt("123哈哈哈")) //123
+console.log(parseInt("哈哈123")) //NaN
+
+// parseInt第二个参数用来指定转换的进制
+console.log(parseInt(11, 2)) //转换成二进制 3
+
+// String类型
+
+// String 类型由0个或多个Unicode字符组成的字符串序列可由单引号或者双引号表示
+// 转义字符 \n 换行 \b 空格 \\斜杠等
+// 特点：一旦创建值就不能改变，要改变某个变量保存的字符串，就要先销毁原来的字符串，然后在用另一个包含新值得字符串填充该变量
+
+// 对象
+// 对象就是数据和操作的集合，“Object类型是所有它的实例的基础。换句话说，Object类型所具有的任何属性和方法也同样存在于更具体的对象中
+// 我们在Console里创建一个对象然后进行分析
+var o = {};//快速创建一个对象。展开
+
+// __proto__的读取器(getter)暴露了一个对象的内部 [[Prototype]] 。
+// 对于使用对象字面量创建的对象，这个值是 Object.prototype。
+// 对于使用数组字面量创建的对象，这个值是 Array.prototype。
+// 对于functions，这个值是Function.prototype。
+// 对于使用 new fun 创建的对象，其中fun是由js提供的内建构造器函数之一(Array, Boolean, Date, Number, Object, String 等等），这个值总是fun.prototype。
+// 对于用js定义的其他js构造器函数创建的对象，这个值就是该构造器函数的prototype属性。
+    
+// __proto__ 的设置器(setter)允许对象的 [[Prototype]]被变更。
+// 前提是这个对象必须通过 Object.isExtensible(): 进行扩展，如果不这样，一个 TypeError 错误将被抛出。
+// 要变更的值必须是一个object或null，提供其它值将不起任何作用。
+// 要理解原型如何被使用，请查看相关文章：Inheritance and the prototype chain。
+    
+// .__proto__属性是Object.prototype 一个简单的访问器属性，其中包含了get（获取）和set（设置）的方法，任何一个__proto__的存取属性都继承于Object.
+// prototype，但一个访问属性如果不是来源于Object.prototype就不拥有.__proto__属性，譬如一个元素设置了其他的.__proto__属性在Object.prototype之前，将会覆盖原有的Object.prototype。
+
+//上面是MDN里的描述，其实就是说__proto__指向它的原型。现在就是指向Object
+
+// JavaScript中几乎所有的对象都是 Object 的实例; 所有的对象都继承了Object.prototype的属性和方法，它们可以被覆盖（除了以null为原型的对象，如 Object.create(null)）。
+// 例如，新的构造函数的原型覆盖原来的构造函数的原型，提供它们自己的 toString() 方法.。
+// 对象的原型的改变会传播到所有对象上，除非这些属性和方法被其他对原型链更里层的改动所覆盖。
+
+var o = {} // o的原型链指向Object，也就说从Object继承过来的
+var o = Object.create(null) //o是没有原型链的
+
+var Person = function() {
+    this.canWork = true
+    this.job = ''
+
+    this.say = function() {
+        if(this.canWork) {
+            console.log(this.name + ":" + "Hello" + "->" + this.job)
+        }
+    }
+}
+
+var Student = function(name) {
+    this.job = 'Student'
+    this.name = name
+}
+
+Student.prototype = new Person() //让Student的原型指向Person,那么它就拥有了Person的方法和属性
+
+var stu = new Student("Bill")
+stu.say() //Bill:Hello->Student
+
+// Object.prototype.constructor
+// 返回了一个创建该对象原型的函数引用
+
+var o = {}
+var array = new Array()
+var func = new Function()
+
+console.log(o.constructor === Object) //true
+console.log(array.constructor === Array) //true
+console.log(func.constructor === Function) //true
+
+// Object.assign(target, ...sources)
+// 方法用于将所有可枚举的属性的值从一个或多个源对象复制到目标对象
+
+var people = {name: "Bill"}
+var son = {age: 10}
+
+var clonePeople = Object.assign(people, {age: 3, grade: 80, son: son})
+console.log(people === clonePeople)
+
+people.age = 5
+console.log(people.age) //5
+console.log(clonePeople.age)//5
+
+people.son.age = 11
+console.log(people.son.age)
+console.log(clonePeople.son.age)
+
+// 所以Object.assign这是浅拷贝（继承属性和不可枚举的属性是不能进行copy的）
+
+// Object.defineProperties(obj, props)
+// 在一个对象上创建新的属性或者修改旧属性的值，并返回本身
+// 属性本身有几种修改方式
+// configurable?: boolean;
+// enumerable?: boolean;
+// value?: any;
+// writable?: boolean;
+// get?(): any;
+// set?(v: any): void;
+
+var people = {}
+Object.defineProperties(people, {
+    name: {
+        value: "Bill",
+        writable: true
+    },
+    age: {
+        get: function() {
+            return 10
+        }
+    }
+})
+
+people.name = "Jason"
+console.log(people.name) //Jason
+people.age = 11
+console.log(people.age) //10
+
+// Object.entries() 方法返回一个给定对象自己的可枚举属性[key，value]对的数组。
+
+var p = {name: "Bill", age: 3}
+console.log(Object.entries(p)) //[["name", "Bill"], ["age", "3"]]
+
+//将Object转换成Map
+var map = new Map(Object.entries(p))
+
+// Object.freeze() 冻结一个对象，使他不能被修改。
+
+var p = {name: "Bill", age: 3}
+var freezeP = Object.freeze(p)
+console.log(Object.isFrozen(p)) //true
+
+console.log(freezeP === p) //true
+p.name = "jason"
+console.log(p.name) //Bill 严格模式会报错
 
